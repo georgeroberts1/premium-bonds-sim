@@ -1,40 +1,65 @@
 import { useState, useEffect } from 'react'
+import styled from 'styled-components'
 import DrawData from './drawData'
-import './App.css'
+import ResultCard from './components/resultCard'
+
+const defaultInvestment = 100000
+
+const StyledSettingsColumnContainer = styled.div`
+  display: flex;
+  justify-content: space-evenly;
+  align-items: flex-end;
+  width: 100%;
+`
 
 function App() {
-  const [startBondValue, setStartBondValue] = useState(2500)
-  const [newBondValue, setNewBondValue] = useState(2500)
-  const [drawsEnded, setDrawsEnded] = useState(false)
+  const [startBondValue, setStartBondValue] = useState(defaultInvestment)
+  const [defaultWinData, setDefaultWinData] = useState({})
+  const [compoundWinData, setCompoundWinData] = useState({})
+  const [drawGroupCompleted, setDrawGroupCompleted] = useState(0)
   const [yearsInvesting, setYearsInvesting] = useState(1)
-  const [winCount, setWinCount] = useState(0)
   const [errorMessage, setErrorMessage] = useState('')
 
+  let drawCount = Math.round(yearsInvesting * 12)
+  
   useEffect(() => {
-    setDrawsEnded(false)
+      setDrawGroupCompleted(0)
   }, [startBondValue, yearsInvesting])
   
-  const handleDrawStart = () => {
+  const handleDrawSequence = () => {    
+    startDraw(startBondValue, false)
+    console.log(drawGroupCompleted)
+    startDraw(startBondValue, true)
+    console.log(drawGroupCompleted)
+  }
+  
+  const startDraw = async (startingBonds, isReinvesting) => {
     //TODO: Create loading feedback for long draws
 
-    let drawData = new DrawData(startBondValue)  
+    let drawData = new DrawData(startingBonds, isReinvesting)  
     let currentDrawCount = 1
 
-    while(currentDrawCount <= (yearsInvesting * 12)) {   
-      // console.log(currentDrawCount)
+    while(currentDrawCount <= (drawCount)) {   
       drawData.getNewDrawData()
       currentDrawCount += 1
     } 
     
+    if(isReinvesting) {
+      setDrawGroupCompleted(2)
+      setCompoundWinData({winValue: drawData.totalWinValue, winCategories: drawData.winType})
+    } else {
+      setDrawGroupCompleted(1)
+      setDefaultWinData({winValue: drawData.totalWinValue, winCategories: drawData.winType})
+    }
+
     console.log(drawData.winType)
-    setDrawsEnded(true)
-    setNewBondValue(drawData.bondValue)
   }
 
   const handleYearChange = e => {
     const year = e.target.value
+    drawCount = Math.round(year * 12)
     setYearsInvesting(year)
-    if (year >= 1 && year <= 100 && year * startBondValue <= 1000000) {
+    if (year >= 1 && year * startBondValue <= 10000000) {
       setErrorMessage()
     } else {
       setErrorMessage('Invalid number of years')
@@ -44,35 +69,50 @@ function App() {
 
   const handleInvestmentChange = e => {
     const investment = parseInt(e.target.value)
-    if (investment >= 1 && investment <= 1000000  && investment * yearsInvesting <= 1000000) {
-      setStartBondValue(investment)
-      setNewBondValue(investment)
+    setStartBondValue(investment)
+    if (investment >= 1 && investment * yearsInvesting <= 10000000) {
       setErrorMessage()
     } else {
-      setErrorMessage('Invalid investment')
-      throw new Error('Invalid investment')
+      setErrorMessage('Invalid entry(s)')
+      throw new Error('Invalid entry(s)')
     }
   }
 
-  return (
-    <div style={{display: 'flex'}}>
-      <div>
-        {errorMessage && <h2 style={{color: 'red'}}>{errorMessage}</h2>}
+  const resultCardProps = {startBondValue, drawCount, yearsInvesting}
 
-        <label>Years investing: </label>
-        <input placeholder='#' type="number" min={1} max={100} onChange={handleYearChange} value={yearsInvesting}></input>
-        <p>Draws over time frame: {yearsInvesting * 12}</p>
-        <label>£ investing: </label>
-        <input placeholder='#' type="number" min={1} onChange={handleInvestmentChange} value={startBondValue}></input>
-        {drawsEnded && <>
+  return (
+    <div>
+      <h1>Should you reinvest your premium bond winnings?</h1>
+      <StyledSettingsColumnContainer>
+        <div>
+          {errorMessage && <h2 style={{color: 'red'}}>{errorMessage}</h2>}
+          <label>Years investing: </label>
+          <input placeholder='#' type="number" min={1} max={100} onChange={handleYearChange} value={yearsInvesting}></input>
           <hr />
-          <p>Predicted bond value after {yearsInvesting * 12} draws: £ {newBondValue}</p>
-          <p>Increase as percentage: {Math.round(newBondValue / startBondValue * 100 + Number.EPSILON ) / 100 } %</p>
-        </>}
-      </div>
-      <div>
-        <button onClick={handleDrawStart} disabled={errorMessage}>Start</button>
-      </div>
+          <label>£ invested: </label>
+          <input placeholder='#' type="number" min={1} onChange={handleInvestmentChange} value={startBondValue}></input>
+        </div>
+        <div>
+          <button onClick={handleDrawSequence} disabled={errorMessage}>Run Draws!</button>
+        </div>
+      </StyledSettingsColumnContainer>
+
+
+      {drawGroupCompleted >= 1 &&
+        <ResultCard 
+          title={'Not Reinvesting'} 
+          winData={defaultWinData}
+          {...resultCardProps}
+          />
+        }
+
+      {drawGroupCompleted === 2 &&
+        <ResultCard 
+          title={'Reinvesting'} 
+          winData={compoundWinData}
+          {...resultCardProps}
+        />
+      }
     </div>
   )
 }

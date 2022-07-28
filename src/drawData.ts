@@ -1,14 +1,9 @@
 // ODDS: https://www.moneysavingexpert.com/savings/premium-bonds/
 
+const oddsData = [[25400, 25], [1357643, 50], [2401096, 100], [10375376, 500], [37861320, 1000], [323740157, 5000], [699201931, 10000], [1688073122, 25000], [3811777478, 50000], [9847084623, 100000], [59082205208, 1000000]]
+
 const randomIntFromInterval = (min: number, max: number) => {
     return Math.floor(Math.random() * (max - min + 1) + min)
-}
-
-interface DrawData {
-    bondValue: number
-    drawCount: number
-    wins: number
-    winType: any
 }
 
 const runDrawWithOdds = (odds: number) => {
@@ -19,20 +14,26 @@ const runDrawWithOdds = (odds: number) => {
 }
 
 const convertOddsToWins = (bonds: number, odds: number, prize: number) => {
-    let wins = 0
+    let winCount = 0
     for (let i = bonds-1; i>=0; i--) {
         if(runDrawWithOdds(odds)) {
-            wins += 1
+            winCount += 1
             // console.log(`${prize} WINNER`)
         } 
     }
-    return {wins, winValue: wins * prize}
+    return {winCount, winValue: winCount * prize}
 }
 
-const oddsData = [[25400, 25], [1357643, 50], [2401096, 100], [10375376, 500], [37861320, 1000], [323740157, 5000], [699201931, 10000], [1688073122, 25000], [3811777478, 50000], [9847084623, 100000], [59082205208, 1000000]]
-
+interface DrawData {
+    bondValue: number
+    drawCount: number
+    wins: number
+    winType: any
+    isReinvesting: boolean
+    totalWinValue: number
+}
 class DrawData {
-    constructor(bondValue: number) {
+    constructor(bondValue: number, isReinvesting: boolean) {
         this.bondValue = bondValue
         this.drawCount = 0
         this.wins = 0
@@ -49,22 +50,24 @@ class DrawData {
             '100000': 0,
             '1000000': 0,
         }
+        this.isReinvesting = isReinvesting
+        this.totalWinValue = 0
     }
 
     getNewDrawData() {
         let totalWins = 0
-        let totalWinValue = 0
+        let startingBonds = this.isReinvesting ? this.bondValue + this.totalWinValue : this.bondValue
 
         for(let odds of oddsData) {
-            let data = convertOddsToWins(this.bondValue, odds[0], odds[1])
-            this.winType[odds[1]] = this.winType[odds[1]] + data.wins
-            totalWins += data.wins
-            totalWinValue += data.winValue
+            let winData = convertOddsToWins(startingBonds, odds[0], odds[1])
+            this.winType[odds[1]] = this.winType[odds[1]] + winData.winCount
+            totalWins += winData.winCount
+            this.totalWinValue += winData.winValue
         }
 
         this.wins += totalWins
-        this.bondValue = this.bondValue + totalWinValue
         this.drawCount += 1
+
     }
 }
 
