@@ -2,6 +2,21 @@ import { useState, useEffect } from 'react'
 import styled from 'styled-components'
 import DrawData from './drawData'
 import ResultCard from './components/resultCard'
+import errorMessages from './copyText/errorMessages.json'
+import { Text, 
+          Input, 
+          InputGroup, 
+          InputLeftElement, 
+          Box, 
+          Flex, 
+          Divider, 
+          Heading, 
+          Button,   
+          FormControl,
+          FormLabel,
+          FormErrorMessage,
+          FormHelperText
+        } from "@chakra-ui/react"
 
 const defaultInvestment = 100000
 
@@ -18,7 +33,7 @@ function App() {
   const [compoundWinData, setCompoundWinData] = useState({})
   const [drawGroupCompleted, setDrawGroupCompleted] = useState(0)
   const [yearsInvesting, setYearsInvesting] = useState(1)
-  const [errorMessage, setErrorMessage] = useState('')
+  const [errorCode, setErrorCode] = useState('')
 
   let drawCount = Math.round(yearsInvesting * 12)
   
@@ -28,9 +43,7 @@ function App() {
   
   const handleDrawSequence = () => {    
     startDraw(startBondValue, false)
-    console.log(drawGroupCompleted)
     startDraw(startBondValue, true)
-    console.log(drawGroupCompleted)
   }
   
   const startDraw = async (startingBonds, isReinvesting) => {
@@ -51,49 +64,61 @@ function App() {
       setDrawGroupCompleted(1)
       setDefaultWinData({winValue: drawData.totalWinValue, winCategories: drawData.winType})
     }
-
-    console.log(drawData.winType)
   }
 
   const handleYearChange = e => {
     const year = e.target.value
     drawCount = Math.round(year * 12)
     setYearsInvesting(year)
-    if (year >= 1 && year * startBondValue <= 10000000) {
-      setErrorMessage()
-    } else {
-      setErrorMessage('Invalid number of years')
-      throw new Error('Invalid year')
-    }
+    isInputValid(year, startBondValue)
   }
 
   const handleInvestmentChange = e => {
     const investment = parseInt(e.target.value)
     setStartBondValue(investment)
-    if (investment >= 1 && investment * yearsInvesting <= 10000000) {
-      setErrorMessage()
-    } else {
-      setErrorMessage('Invalid entry(s)')
-      throw new Error('Invalid entry(s)')
-    }
+    isInputValid(yearsInvesting, investment)
+  }
+
+  const isInputValid = (yearsInvesting, investment) => {
+    if (!investment && !yearsInvesting || investment * yearsInvesting > 10000000) {
+      setErrorCode('invalidInputs')
+    } else if(!investment || investment < 1) {
+      setErrorCode('invalidBondValue')
+    } else if (!yearsInvesting || yearsInvesting < 1) {
+      setErrorCode('invalidYears')
+    } else 
+      setErrorCode()
   }
 
   const resultCardProps = {startBondValue, drawCount, yearsInvesting}
 
   return (
     <div>
-      <h1>Should you reinvest your premium bond winnings?</h1>
+      <Heading as='h2' size='xl' noOfLines={2}>Should you reinvest your premium bond winnings?</Heading>
+
+      {/* TODO: Convert inputs to chakra ui form in separate component */}
       <StyledSettingsColumnContainer>
         <div>
-          {errorMessage && <h2 style={{color: 'red'}}>{errorMessage}</h2>}
-          <label>Years investing: </label>
-          <input placeholder='#' type="number" min={1} max={100} onChange={handleYearChange} value={yearsInvesting}></input>
-          <hr />
-          <label>£ invested: </label>
-          <input placeholder='#' type="number" min={1} onChange={handleInvestmentChange} value={startBondValue}></input>
+          {errorCode && <h2 style={{color: 'red'}}>{errorMessages[errorCode]}</h2>}
+          <InputGroup>
+            <Input isInvalid={['invalidYears', 'invalidInputs'].includes(errorCode)} placeholder='Years investing' type="number" min={1} max={100} onChange={handleYearChange} value={yearsInvesting}></Input>
+          </InputGroup>
+
+          <Divider />
+
+          <InputGroup>
+            <InputLeftElement
+              pointerEvents='none'
+              color='gray.300'
+              fontSize='1.2em'
+              children='£'
+            />
+            <Input isInvalid={['invalidBondValue', 'invalidInputs'].includes(errorCode)} placeholder='Investment' type="number" min={1} onChange={handleInvestmentChange} value={startBondValue}></Input>
+          </InputGroup>
         </div>
+
         <div>
-          <button onClick={handleDrawSequence} disabled={errorMessage}>Run Draws!</button>
+          <Button colorScheme='green' onClick={handleDrawSequence} isDisabled={errorCode}>Run Draws!</Button>
         </div>
       </StyledSettingsColumnContainer>
 
