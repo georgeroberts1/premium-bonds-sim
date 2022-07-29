@@ -1,4 +1,4 @@
-import { Divider, Heading } from '@chakra-ui/react'
+import { Text, Divider, Heading } from '@chakra-ui/react'
 import WinTable from './winTable';
 
 const asPercentageOfStartBond = (newValue, startValue) => {
@@ -12,10 +12,9 @@ const ResultCard = (props) => {
 
     return (
         <div>
-            <Divider />
             <Heading as='h3' size='lg'>{props.title}</Heading>
-            <p>Predicted bond value after {props.drawCount} draws: <b>£ {finalValue}</b></p>
-            <p>Increase as percentage: <b>{asPercentageOfStartBond(finalValue, props.startBondValue)} %</b></p>
+            <Text>Predicted bond value after {props.drawCount} draws: <b>£ {finalValue}</b></Text>
+            <Text>Increase as percentage: <b>{asPercentageOfStartBond(finalValue, props.startBondValue)} %</b></Text>
             <WinTable winCategories={props.winData.winCategories} />
 
             <Divider />

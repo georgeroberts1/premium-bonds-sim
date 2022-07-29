@@ -32,7 +32,7 @@ function App() {
   const [defaultWinData, setDefaultWinData] = useState({})
   const [compoundWinData, setCompoundWinData] = useState({})
   const [drawGroupCompleted, setDrawGroupCompleted] = useState(0)
-  const [yearsInvesting, setYearsInvesting] = useState(1)
+  const [yearsInvesting, setYearsInvesting] = useState(5)
   const [errorCode, setErrorCode] = useState('')
 
   let drawCount = Math.round(yearsInvesting * 12)
@@ -122,6 +122,7 @@ function App() {
         </div>
       </StyledSettingsColumnContainer>
 
+      <br />
 
       {drawGroupCompleted >= 1 &&
         <ResultCard 

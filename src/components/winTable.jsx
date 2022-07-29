@@ -16,21 +16,22 @@ const WinTable = (props) => {
     return (
         <TableContainer>
             <Table variant='simple'>
-                <TableCaption>Breakdown Of Prizes Won</TableCaption>
                 <Thead>
                 <Tr>
+                    <Th>£</Th>
                     {prizes.map(prize => {
                         return prize === 1000000 
-                            ? <Th>1 Million</Th>
+                            ? <Th key={prize}>1 Million</Th>
                             : prize % 1000 <= 1
-                            ? <Th>{prize / 1000}k</Th> 
-                            : <Th>{prize}</Th>
+                            ? <Th key={prize}>{prize / 1000}k</Th> 
+                            : <Th key={prize}>{prize}</Th>
                     })}
                 </Tr>
                 </Thead>
                 <Tbody>
                 <Tr>
-                    {prizes.map(prize => <Td>{JSON.stringify(props.winCategories[prize])}</Td>)}
+                    <Th>Count</Th>
+                    {prizes.map(prize => <Td key={prize}>{JSON.stringify(props.winCategories[prize])}</Td>)}
                 </Tr>
                 </Tbody>
             </Table>
