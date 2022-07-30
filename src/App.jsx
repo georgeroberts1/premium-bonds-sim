@@ -36,7 +36,7 @@ function App() {
   const [errorCode, setErrorCode] = useState('')
 
   let drawCount = Math.round(yearsInvesting * 12)
-  
+
   useEffect(() => {
       setDrawGroupCompleted(0)
   }, [startBondValue, yearsInvesting])
@@ -94,27 +94,31 @@ function App() {
 
   return (
     <div>
-      <Heading as='h2' size='xl' noOfLines={2}>Should you reinvest your premium bond winnings?</Heading>
+      <Heading as='h2' size='xl' noOfLines={2}>Should You Reinvest Your Premium Bond Winnings?</Heading>
 
-      {/* TODO: Convert inputs to chakra ui form in separate component */}
       <StyledSettingsColumnContainer>
         <div>
-          {errorCode && <h2 style={{color: 'red'}}>{errorMessages[errorCode]}</h2>}
-          <InputGroup>
-            <Input isInvalid={['invalidYears', 'invalidInputs'].includes(errorCode)} placeholder='Years investing' type="number" min={1} max={100} onChange={handleYearChange} value={yearsInvesting}></Input>
-          </InputGroup>
+          <FormControl isInvalid={errorCode}>
+            <FormLabel>Years Holding</FormLabel>
+            <InputGroup>
+              <Input isInvalid={['invalidYears', 'invalidInputs'].includes(errorCode)} placeholder='Years investing' type="number" min={1} max={100} onChange={handleYearChange} value={yearsInvesting}></Input>
+            </InputGroup>
+            {['invalidYears', 'invalidInputs'].includes(errorCode) && <FormErrorMessage>{errorMessages[errorCode]}</FormErrorMessage>}
 
-          <Divider />
+            <br />
 
-          <InputGroup>
-            <InputLeftElement
-              pointerEvents='none'
-              color='gray.300'
-              fontSize='1.2em'
-              children='£'
-            />
-            <Input isInvalid={['invalidBondValue', 'invalidInputs'].includes(errorCode)} placeholder='Investment' type="number" min={1} onChange={handleInvestmentChange} value={startBondValue}></Input>
-          </InputGroup>
+            <FormLabel>Number Of Premium Bonds</FormLabel>
+            <InputGroup>
+              <InputLeftElement
+                pointerEvents='none'
+                color='gray.300'
+                fontSize='1.2em'
+                children='£'
+              />
+              <Input isInvalid={['invalidBondValue', 'invalidInputs'].includes(errorCode)} placeholder='Bonds' type="number" min={1} onChange={handleInvestmentChange} value={startBondValue}></Input>
+            </InputGroup>
+            {['invalidBondValue', 'invalidInputs'].includes(errorCode) && <FormErrorMessage>{errorMessages[errorCode]}</FormErrorMessage>}
+          </FormControl>
         </div>
 
         <div>
@@ -131,7 +135,7 @@ function App() {
           {...resultCardProps}
           />
         }
-
+      
       {drawGroupCompleted === 2 &&
         <ResultCard 
           title={'Reinvesting'} 

@@ -15,7 +15,7 @@ const WinTable = (props) => {
 
     return (
         <TableContainer>
-            <Table variant='simple'>
+            <Table variant='simple' colorScheme='green'>
                 <Thead>
                 <Tr>
                     <Th>£</Th>
