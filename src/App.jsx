@@ -9,6 +9,7 @@ import { Text,
           InputGroup, 
           InputLeftElement, 
           Box, 
+          Container,
           Popover,
           PopoverTrigger,
           PopoverContent,
@@ -46,9 +47,11 @@ function App() {
   }, [startBondValue, yearsInvesting])
   
   const handleDrawSequence = async () => {    
-    setRunCount(prevState => prevState += 1)
-    await startDraw(startBondValue, false)
-    await startDraw(startBondValue, true)
+    // setInterval(async () => {
+      setRunCount(prevState => prevState += 1)
+      await startDraw(startBondValue, false)
+      await startDraw(startBondValue, true)
+    // }, 50)
   }
   
   const startDraw = async (startingBonds, isReinvesting) => {
@@ -97,7 +100,7 @@ function App() {
 
   return (
     <>
-      <Flex flexDirection="row" justifyContent='space-between' alignItems='center'>
+      <Flex flexDirection="row" justifyContent='space-between' alignItems='center' margin='20px 0 20px 0'>
         <Heading as='h2' size='xl' noOfLines={2}>Should You Reinvest Your Premium Bond Winnings?</Heading>
         <Popover>
           <PopoverTrigger>
@@ -116,45 +119,51 @@ function App() {
         </Popover>
       </Flex>
 
-      <Flex flexDirection="row">
-        <Flex flexDirection='column' justifyContent='flex-start' padding='20px'>
-          <Box width='md'>
-            <FormControl isInvalid={errorCode}>
-              <FormLabel>Years Holding</FormLabel>
-              <InputGroup>
-                <Input isInvalid={[...invalidErrorsList, 'invalidYears'].includes(errorCode)} placeholder='Years investing' type="number" min={1} max={100} onChange={handleYearChange} value={yearsInvesting}></Input>
-              </InputGroup>
-              {[...invalidErrorsList, 'invalidYears'].includes(errorCode) && <FormErrorMessage>{errorMessages[errorCode]}</FormErrorMessage>}
+      <Flex flexDirection="row" gap="10px">
+        <Flex flexDirection='column' justifyContent='flex-start'>
+          <FormControl isInvalid={errorCode}>
+            <FormLabel>Years Holding</FormLabel>
+            <InputGroup>
+              <InputLeftElement
+                pointerEvents='none'
+                color='gray.300'
+                fontSize='1.2em'
+                children='⌛'
+              />
+              <Input isInvalid={[...invalidErrorsList, 'invalidYears'].includes(errorCode)} placeholder='Years investing' type="number" min={1} max={100} onChange={handleYearChange} value={yearsInvesting}></Input>
+            </InputGroup>
+            {[...invalidErrorsList, 'invalidYears'].includes(errorCode) && <FormErrorMessage>{errorMessages[errorCode]}</FormErrorMessage>}
 
-              <br />
+            <br />
 
-              <FormLabel>Number Of Premium Bonds</FormLabel>
-              <InputGroup>
-                <InputLeftElement
-                  pointerEvents='none'
-                  color='gray.300'
-                  fontSize='1.2em'
-                  children='£'
-                />
-                <Input isInvalid={[...invalidErrorsList, 'invalidBondValue'].includes(errorCode)} placeholder='Bonds' type="number" min={1} max={50000} onChange={handleInvestmentChange} value={startBondValue}></Input>
-              </InputGroup>
-              {[...invalidErrorsList, 'invalidBondValue'].includes(errorCode) && <FormErrorMessage>{errorMessages[errorCode]}</FormErrorMessage>}
-            </FormControl>
-          </Box>
+            <FormLabel>Number Of Premium Bonds</FormLabel>
+            <InputGroup>
+              <InputLeftElement
+                pointerEvents='none'
+                color='gray.300'
+                fontSize='1.2em'
+                children='£'
+              />
+              <Input isInvalid={[...invalidErrorsList, 'invalidBondValue'].includes(errorCode)} placeholder='Bonds' type="number" min={1} max={50000} onChange={handleInvestmentChange} value={startBondValue}></Input>
+            </InputGroup>
+            {[...invalidErrorsList, 'invalidBondValue'].includes(errorCode) && <FormErrorMessage>{errorMessages[errorCode]}</FormErrorMessage>}
+          </FormControl>
 
-          <Flex width='md' maxHeight='168px' textAlign='center' flexDirection='column' justifyContent='space-between'>
+          <Flex flexDirection="column" alignItems='center' justifyContent="space-between">
             <Box>
-              <Heading as='h1' size='2xl'>{drawCount}</Heading>
+              <Heading as='h1' size='xl'>{drawCount}</Heading>
               <Text fontSize='25px'>Draws</Text>
             </Box>
-            <Button colorScheme='green' onClick={handleDrawSequence} isDisabled={errorCode}>Run!</Button>
+            <Button colorScheme='green' onClick={handleDrawSequence} isDisabled={errorCode} width='100%' marginTop='20px'>Run!</Button>
           </Flex>
         </Flex>
 
-        <Flex flexDirection="Column" size="md">
-          {Object.entries(compoundWinData).length > 0 && <Results {...resultProps} />}
-          <WinGraph {...winGraphProps} />
-        </Flex>
+        {Object.entries(compoundWinData).length > 0 &&
+          <Flex flexDirection="Column" size="md">
+            <WinGraph {...winGraphProps} />
+            <Results {...resultProps} />
+          </Flex>
+        }
       </Flex>
     </>
   )
