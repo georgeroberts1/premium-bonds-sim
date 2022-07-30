@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import DrawData from './drawData'
 import ResultCard from './components/resultCard'
+import WinGraph from './components/winGraph'
 import errorMessages from './copyText/errorMessages.json'
 import { InfoOutlineIcon, ExternalLinkIcon } from '@chakra-ui/icons'
 import { Text, 
@@ -37,14 +38,17 @@ function App() {
   const [drawGroupCompleted, setDrawGroupCompleted] = useState(0)
   const [yearsInvesting, setYearsInvesting] = useState(5)
   const [errorCode, setErrorCode] = useState('')
+  const [runCount, setRunCount] = useState(0)
 
   let drawCount = Math.round(yearsInvesting * 12)
 
   useEffect(() => {
       setDrawGroupCompleted(0)
+      setRunCount(0)
   }, [startBondValue, yearsInvesting])
   
   const handleDrawSequence = () => {    
+    setRunCount(prevState => prevState += 1)
     startDraw(startBondValue, false)
     startDraw(startBondValue, true)
   }
@@ -96,6 +100,7 @@ function App() {
   }
 
   const resultCardProps = {startBondValue, drawCount, yearsInvesting}
+  const winGraphProps = {runCount, defaultWinData, compoundWinData}
   const invalidErrorsList = ['invalidInputs', 'invalidDraws']
 
   return (
@@ -164,12 +169,16 @@ function App() {
         }
       
       {drawGroupCompleted === 2 &&
-        <ResultCard 
-          title={'Reinvesting'} 
-          winData={compoundWinData}
-          {...resultCardProps}
-        />
+        <>
+          <ResultCard 
+            title={'Reinvesting'} 
+            winData={compoundWinData}
+            {...resultCardProps}
+          />
+          <WinGraph {...winGraphProps} />
+        </>
       }
+
     </Box>
   )
 }
