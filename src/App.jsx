@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import DrawData from './drawData'
-import ResultCard from './components/resultCard'
+import Results from './components/results/results'
 import errorMessages from './copyText/errorMessages.json'
 import { InfoOutlineIcon, ExternalLinkIcon } from '@chakra-ui/icons'
 import { Text, 
@@ -28,30 +28,34 @@ import { Text,
           FormHelperText
         } from "@chakra-ui/react"
 
-const defaultInvestment = 100000
+const defaultInvestment = 10000
 
 function App() {
   const [startBondValue, setStartBondValue] = useState(defaultInvestment)
   const [defaultWinData, setDefaultWinData] = useState({})
   const [compoundWinData, setCompoundWinData] = useState({})
-  const [drawGroupCompleted, setDrawGroupCompleted] = useState(0)
-  const [yearsInvesting, setYearsInvesting] = useState(5)
+  const [yearsInvesting, setYearsInvesting] = useState(30)
   const [errorCode, setErrorCode] = useState('')
-
+  const [drawSequenceRunning, setDrawSequenceRunning] = useState(false)
   let drawCount = Math.round(yearsInvesting * 12)
 
   useEffect(() => {
-      setDrawGroupCompleted(0)
-  }, [startBondValue, yearsInvesting])
-  
-  const handleDrawSequence = () => {    
-    startDraw(startBondValue, false)
-    startDraw(startBondValue, true)
+    drawSequenceRunning && setCompoundWinData({})
+    console.log(compoundWinData)
+  }, [drawSequenceRunning])
+
+  const isDataSet = (dataObj) => {
+    return Object.entries(dataObj).length > 0
+  }
+
+  const handleDrawSequence = async () => { 
+    setDrawSequenceRunning(true)
+    await startDraw(startBondValue, false)
+    await startDraw(startBondValue, true)
+    setDrawSequenceRunning(false)
   }
   
   const startDraw = async (startingBonds, isReinvesting) => {
-    //TODO: Create loading feedback for long draws
-
     let drawData = new DrawData(startingBonds, isReinvesting)  
     let currentDrawCount = 1
 
@@ -60,13 +64,9 @@ function App() {
       currentDrawCount += 1
     } 
     
-    if(isReinvesting) {
-      setDrawGroupCompleted(2)
-      setCompoundWinData({winValue: drawData.totalWinValue, winCategories: drawData.winType})
-    } else {
-      setDrawGroupCompleted(1)
-      setDefaultWinData({winValue: drawData.totalWinValue, winCategories: drawData.winType})
-    }
+    const winData = {winValue: drawData.totalWinValue, winCategories: drawData.winType}
+
+    isReinvesting ? setCompoundWinData(winData) : setDefaultWinData(winData)
   }
 
   const handleYearChange = e => {
@@ -95,7 +95,7 @@ function App() {
       setErrorCode()
   }
 
-  const resultCardProps = {startBondValue, drawCount, yearsInvesting}
+  const resultProps = {startBondValue, drawCount, yearsInvesting, defaultWinData, compoundWinData}
   const invalidErrorsList = ['invalidInputs', 'invalidDraws']
 
   return (
@@ -144,7 +144,7 @@ function App() {
           </FormControl>
         </Box>
 
-        <Flex width='md' textAlign='center' flexDirection='column' justifyContent='space-between'>
+        <Flex width='md' maxHeight='168px' textAlign='center' flexDirection='column' justifyContent='space-between'>
           <Box>
             <Heading as='h1' size='2xl'>{drawCount}</Heading>
             <Text fontSize='25px'>Draws</Text>
@@ -155,21 +155,11 @@ function App() {
 
       <br />
 
-      {drawGroupCompleted >= 1 &&
-        <ResultCard 
-          title={'Not Reinvesting'} 
-          winData={defaultWinData}
-          {...resultCardProps}
-          />
-        }
-      
-      {drawGroupCompleted === 2 &&
-        <ResultCard 
-          title={'Reinvesting'} 
-          winData={compoundWinData}
-          {...resultCardProps}
-        />
-      }
+      {drawSequenceRunning
+        ? <p>Loading...</p> 
+        : !drawSequenceRunning && isDataSet(compoundWinData)
+        ? <Results {...resultProps} />
+        : ''}
     </Box>
   )
 }
