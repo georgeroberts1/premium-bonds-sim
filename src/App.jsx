@@ -23,7 +23,7 @@ const defaultInvestment = 100000
 const StyledSettingsColumnContainer = styled.div`
   display: flex;
   justify-content: space-evenly;
-  align-items: flex-end;
+  align-items: center;
   width: 100%;
 `
 
@@ -80,8 +80,10 @@ function App() {
   }
 
   const isInputValid = (yearsInvesting, investment) => {
-    if (!investment && !yearsInvesting || investment * yearsInvesting > 10000000) {
-      setErrorCode('invalidInputs')
+    if (!investment && !yearsInvesting) {
+      setErrorCode('invalidInputs') 
+    } else if (investment * yearsInvesting > 10000000) {
+      setErrorCode('invalidDraws')
     } else if(!investment || investment < 1) {
       setErrorCode('invalidBondValue')
     } else if (!yearsInvesting || yearsInvesting < 1) {
@@ -91,6 +93,7 @@ function App() {
   }
 
   const resultCardProps = {startBondValue, drawCount, yearsInvesting}
+  const invalidErrorsList = ['invalidInputs', 'invalidDraws']
 
   return (
     <div>
@@ -101,9 +104,9 @@ function App() {
           <FormControl isInvalid={errorCode}>
             <FormLabel>Years Holding</FormLabel>
             <InputGroup>
-              <Input isInvalid={['invalidYears', 'invalidInputs'].includes(errorCode)} placeholder='Years investing' type="number" min={1} max={100} onChange={handleYearChange} value={yearsInvesting}></Input>
+              <Input isInvalid={[...invalidErrorsList, 'invalidYears'].includes(errorCode)} placeholder='Years investing' type="number" min={1} max={100} onChange={handleYearChange} value={yearsInvesting}></Input>
             </InputGroup>
-            {['invalidYears', 'invalidInputs'].includes(errorCode) && <FormErrorMessage>{errorMessages[errorCode]}</FormErrorMessage>}
+            {[...invalidErrorsList, 'invalidYears'].includes(errorCode) && <FormErrorMessage>{errorMessages[errorCode]}</FormErrorMessage>}
 
             <br />
 
@@ -115,9 +118,9 @@ function App() {
                 fontSize='1.2em'
                 children='£'
               />
-              <Input isInvalid={['invalidBondValue', 'invalidInputs'].includes(errorCode)} placeholder='Bonds' type="number" min={1} onChange={handleInvestmentChange} value={startBondValue}></Input>
+              <Input isInvalid={[...invalidErrorsList, 'invalidBondValue'].includes(errorCode)} placeholder='Bonds' type="number" min={1} onChange={handleInvestmentChange} value={startBondValue}></Input>
             </InputGroup>
-            {['invalidBondValue', 'invalidInputs'].includes(errorCode) && <FormErrorMessage>{errorMessages[errorCode]}</FormErrorMessage>}
+            {[...invalidErrorsList, 'invalidBondValue'].includes(errorCode) && <FormErrorMessage>{errorMessages[errorCode]}</FormErrorMessage>}
           </FormControl>
         </div>
 
