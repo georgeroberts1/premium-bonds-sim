@@ -2,7 +2,7 @@ import { Box,
         Text, 
         Divider, 
         Heading } from '@chakra-ui/react'
-import WinTable from './winTable';
+import WinTable from '../winTable'
 
 const asPercentageOfStartBond = (newValue, startValue) => {
     return (newValue / startValue * 100 - 100).toFixed(1)
@@ -12,7 +12,6 @@ const average = arr => (arr.reduce( ( a, b ) => a + b, 0 ) / arr.length).toFixed
 
 const ResultCard = (props) => {
     const finalValue = props.startBondValue + props.winData.winValue
-
     return (
         <Box w='100%' p={4} color='black' borderWidth='0.01em' borderRadius='lg' marginBottom='5px'> 
             <Heading as='h3' size='lg'>{props.title}</Heading>

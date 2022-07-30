@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import DrawData from './drawData'
-import ResultCard from './components/resultCard'
+import Results from './components/results/results'
 import WinGraph from './components/winGraph'
 import errorMessages from './copyText/errorMessages.json'
 import { InfoOutlineIcon, ExternalLinkIcon } from '@chakra-ui/icons'
@@ -29,33 +29,29 @@ import { Text,
           FormHelperText
         } from "@chakra-ui/react"
 
-const defaultInvestment = 100000
+const defaultInvestment = 100
 
 function App() {
   const [startBondValue, setStartBondValue] = useState(defaultInvestment)
   const [defaultWinData, setDefaultWinData] = useState({})
   const [compoundWinData, setCompoundWinData] = useState({})
-  const [drawGroupCompleted, setDrawGroupCompleted] = useState(0)
-  const [yearsInvesting, setYearsInvesting] = useState(5)
+  const [yearsInvesting, setYearsInvesting] = useState(30)
   const [errorCode, setErrorCode] = useState('')
   const [runCount, setRunCount] = useState(0)
 
   let drawCount = Math.round(yearsInvesting * 12)
 
   useEffect(() => {
-      setDrawGroupCompleted(0)
       setRunCount(0)
   }, [startBondValue, yearsInvesting])
   
-  const handleDrawSequence = () => {    
+  const handleDrawSequence = async () => {    
     setRunCount(prevState => prevState += 1)
-    startDraw(startBondValue, false)
-    startDraw(startBondValue, true)
+    await startDraw(startBondValue, false)
+    await startDraw(startBondValue, true)
   }
   
   const startDraw = async (startingBonds, isReinvesting) => {
-    //TODO: Create loading feedback for long draws
-
     let drawData = new DrawData(startingBonds, isReinvesting)  
     let currentDrawCount = 1
 
@@ -64,13 +60,9 @@ function App() {
       currentDrawCount += 1
     } 
     
-    if(isReinvesting) {
-      setDrawGroupCompleted(2)
-      setCompoundWinData({winValue: drawData.totalWinValue, winCategories: drawData.winType})
-    } else {
-      setDrawGroupCompleted(1)
-      setDefaultWinData({winValue: drawData.totalWinValue, winCategories: drawData.winType})
-    }
+    const winData = {winValue: drawData.totalWinValue, winCategories: drawData.winType}
+
+    isReinvesting ? setCompoundWinData(winData) : setDefaultWinData(winData)
   }
 
   const handleYearChange = e => {
@@ -98,14 +90,14 @@ function App() {
     } else 
       setErrorCode()
   }
-
-  const resultCardProps = {startBondValue, drawCount, yearsInvesting}
+  
   const winGraphProps = {runCount, defaultWinData, compoundWinData}
+  const resultProps = {startBondValue, drawCount, yearsInvesting, defaultWinData, compoundWinData}
   const invalidErrorsList = ['invalidInputs', 'invalidDraws']
 
   return (
-    <Box>
-      <Flex justifyContent='space-between' alignItems='center'>
+    <>
+      <Flex flexDirection="row" justifyContent='space-between' alignItems='center'>
         <Heading as='h2' size='xl' noOfLines={2}>Should You Reinvest Your Premium Bond Winnings?</Heading>
         <Popover>
           <PopoverTrigger>
@@ -120,66 +112,51 @@ function App() {
                 NS&amp;I's Draw Breakdown <ExternalLinkIcon mx='2px' />
               </Link>
             </PopoverBody>
-          </PopoverContent>
+          </PopoverContent> 
         </Popover>
       </Flex>
 
-      <Flex flexDirection='row' justifyContent='space-evenly' marginTop='20px'>
-        <Box width='md'>
-          <FormControl isInvalid={errorCode}>
-            <FormLabel>Years Holding</FormLabel>
-            <InputGroup>
-              <Input isInvalid={[...invalidErrorsList, 'invalidYears'].includes(errorCode)} placeholder='Years investing' type="number" min={1} max={100} onChange={handleYearChange} value={yearsInvesting}></Input>
-            </InputGroup>
-            {[...invalidErrorsList, 'invalidYears'].includes(errorCode) && <FormErrorMessage>{errorMessages[errorCode]}</FormErrorMessage>}
+      <Flex flexDirection="row">
+        <Flex flexDirection='column' justifyContent='flex-start' padding='20px'>
+          <Box width='md'>
+            <FormControl isInvalid={errorCode}>
+              <FormLabel>Years Holding</FormLabel>
+              <InputGroup>
+                <Input isInvalid={[...invalidErrorsList, 'invalidYears'].includes(errorCode)} placeholder='Years investing' type="number" min={1} max={100} onChange={handleYearChange} value={yearsInvesting}></Input>
+              </InputGroup>
+              {[...invalidErrorsList, 'invalidYears'].includes(errorCode) && <FormErrorMessage>{errorMessages[errorCode]}</FormErrorMessage>}
 
-            <br />
+              <br />
 
-            <FormLabel>Number Of Premium Bonds</FormLabel>
-            <InputGroup>
-              <InputLeftElement
-                pointerEvents='none'
-                color='gray.300'
-                fontSize='1.2em'
-                children='£'
-              />
-              <Input isInvalid={[...invalidErrorsList, 'invalidBondValue'].includes(errorCode)} placeholder='Bonds' type="number" min={1} onChange={handleInvestmentChange} value={startBondValue}></Input>
-            </InputGroup>
-            {[...invalidErrorsList, 'invalidBondValue'].includes(errorCode) && <FormErrorMessage>{errorMessages[errorCode]}</FormErrorMessage>}
-          </FormControl>
-        </Box>
-
-        <Flex width='md' textAlign='center' flexDirection='column' justifyContent='space-between'>
-          <Box>
-            <Heading as='h1' size='2xl'>{drawCount}</Heading>
-            <Text fontSize='25px'>Draws</Text>
+              <FormLabel>Number Of Premium Bonds</FormLabel>
+              <InputGroup>
+                <InputLeftElement
+                  pointerEvents='none'
+                  color='gray.300'
+                  fontSize='1.2em'
+                  children='£'
+                />
+                <Input isInvalid={[...invalidErrorsList, 'invalidBondValue'].includes(errorCode)} placeholder='Bonds' type="number" min={1} max={50000} onChange={handleInvestmentChange} value={startBondValue}></Input>
+              </InputGroup>
+              {[...invalidErrorsList, 'invalidBondValue'].includes(errorCode) && <FormErrorMessage>{errorMessages[errorCode]}</FormErrorMessage>}
+            </FormControl>
           </Box>
-          <Button colorScheme='green' onClick={handleDrawSequence} isDisabled={errorCode}>Run!</Button>
+
+          <Flex width='md' maxHeight='168px' textAlign='center' flexDirection='column' justifyContent='space-between'>
+            <Box>
+              <Heading as='h1' size='2xl'>{drawCount}</Heading>
+              <Text fontSize='25px'>Draws</Text>
+            </Box>
+            <Button colorScheme='green' onClick={handleDrawSequence} isDisabled={errorCode}>Run!</Button>
+          </Flex>
+        </Flex>
+
+        <Flex flexDirection="Column" size="md">
+          {Object.entries(compoundWinData).length > 0 && <Results {...resultProps} />}
+          <WinGraph {...winGraphProps} />
         </Flex>
       </Flex>
-
-      <br />
-
-      {drawGroupCompleted >= 1 &&
-        <ResultCard 
-          title={'Not Reinvesting'} 
-          winData={defaultWinData}
-          {...resultCardProps}
-          />
-        }
-      
-      {drawGroupCompleted === 2 &&
-        <>
-          <ResultCard 
-            title={'Reinvesting'} 
-            winData={compoundWinData}
-            {...resultCardProps}
-          />
-          <WinGraph {...winGraphProps} />
-        </>
-      }
-
-    </Box>
+    </>
   )
 }
 

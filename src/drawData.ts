@@ -3,7 +3,7 @@
 const oddsData = [[25400, 25], [1357643, 50], [2401096, 100], [10375376, 500], [37861320, 1000], [323740157, 5000], [699201931, 10000], [1688073122, 25000], [3811777478, 50000], [9847084623, 100000], [59082205208, 1000000]]
 
 const randomIntFromInterval = (min: number, max: number) => {
-    return Math.floor(Math.random() * (max - min + 1) + min)
+    return Math.floor(Math.random() * (max - min + 1) + min)    
 }
 
 const runDrawWithOdds = (odds: number) => {
