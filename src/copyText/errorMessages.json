@@ -1,6 +1,6 @@
 {
    "invalidInputs":"Both inputs are invalid",
-   "invalidDraws":"We can't compute this many draws. Please reduce one or both values",
+   "invalidDraws":"It will take too long to compute these draws. Please reduce one or both values",
    "invalidBondValue":"Bond value is invalid",
    "invalidYears":"Year value is invalid"
 }

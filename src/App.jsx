@@ -1,14 +1,24 @@
 import { useState, useEffect } from 'react'
-import styled from 'styled-components'
 import DrawData from './drawData'
 import ResultCard from './components/resultCard'
 import errorMessages from './copyText/errorMessages.json'
+import { InfoOutlineIcon, ExternalLinkIcon } from '@chakra-ui/icons'
 import { Text, 
           Input, 
           InputGroup, 
           InputLeftElement, 
           Box, 
+          Popover,
+          PopoverTrigger,
+          PopoverContent,
+          PopoverHeader,
+          PopoverBody,
+          PopoverFooter,
+          PopoverArrow,
+          PopoverCloseButton,
+          PopoverAnchor,
           Flex, 
+          Link,
           Divider, 
           Heading, 
           Button,   
@@ -19,13 +29,6 @@ import { Text,
         } from "@chakra-ui/react"
 
 const defaultInvestment = 100000
-
-const StyledSettingsColumnContainer = styled.div`
-  display: flex;
-  justify-content: space-evenly;
-  align-items: center;
-  width: 100%;
-`
 
 function App() {
   const [startBondValue, setStartBondValue] = useState(defaultInvestment)
@@ -96,11 +99,28 @@ function App() {
   const invalidErrorsList = ['invalidInputs', 'invalidDraws']
 
   return (
-    <div>
-      <Heading as='h2' size='xl' noOfLines={2}>Should You Reinvest Your Premium Bond Winnings?</Heading>
+    <Box>
+      <Flex justifyContent='space-between' alignItems='center'>
+        <Heading as='h2' size='xl' noOfLines={2}>Should You Reinvest Your Premium Bond Winnings?</Heading>
+        <Popover>
+          <PopoverTrigger>
+            <Link><InfoOutlineIcon /></Link>
+          </PopoverTrigger>
+          <PopoverContent>
+            <PopoverArrow />
+            <PopoverCloseButton />
+            <PopoverHeader bg='black' color='white'>Source of Odds</PopoverHeader>
+            <PopoverBody>
+              <Link href='https://nsandi-corporate.com/news-research/news/here-comes-sun-two-new-premium-bonds-millionaires-inner-london-and-surrey' isExternal>
+                NS&amp;I's Draw Breakdown <ExternalLinkIcon mx='2px' />
+              </Link>
+            </PopoverBody>
+          </PopoverContent>
+        </Popover>
+      </Flex>
 
-      <StyledSettingsColumnContainer>
-        <div>
+      <Flex flexDirection='row' justifyContent='space-evenly' marginTop='20px'>
+        <Box width='md'>
           <FormControl isInvalid={errorCode}>
             <FormLabel>Years Holding</FormLabel>
             <InputGroup>
@@ -122,12 +142,16 @@ function App() {
             </InputGroup>
             {[...invalidErrorsList, 'invalidBondValue'].includes(errorCode) && <FormErrorMessage>{errorMessages[errorCode]}</FormErrorMessage>}
           </FormControl>
-        </div>
+        </Box>
 
-        <div>
-          <Button colorScheme='green' onClick={handleDrawSequence} isDisabled={errorCode}>Run Draws!</Button>
-        </div>
-      </StyledSettingsColumnContainer>
+        <Flex width='md' textAlign='center' flexDirection='column' justifyContent='space-between'>
+          <Box>
+            <Heading as='h1' size='2xl'>{drawCount}</Heading>
+            <Text fontSize='25px'>Draws</Text>
+          </Box>
+          <Button colorScheme='green' onClick={handleDrawSequence} isDisabled={errorCode}>Run!</Button>
+        </Flex>
+      </Flex>
 
       <br />
 
@@ -146,7 +170,7 @@ function App() {
           {...resultCardProps}
         />
       }
-    </div>
+    </Box>
   )
 }
 
