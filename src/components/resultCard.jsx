@@ -5,7 +5,7 @@ import { Box,
 import WinTable from './winTable';
 
 const asPercentageOfStartBond = (newValue, startValue) => {
-    return (newValue / startValue * 100 / 100).toFixed(3)
+    return (newValue / startValue * 100 - 100).toFixed(1)
 }
 
 const average = arr => (arr.reduce( ( a, b ) => a + b, 0 ) / arr.length).toFixed(2);
