@@ -86,7 +86,7 @@ function App() {
       setErrorCode('invalidInputs') 
     } else if (investment * yearsInvesting > 10000000) {
       setErrorCode('invalidDraws')
-    } else if(!investment || investment < 1) {
+    } else if(!investment || investment < 1 || investment > 50000) {
       setErrorCode('invalidBondValue')
     } else if (!yearsInvesting || yearsInvesting < 1) {
       setErrorCode('invalidYears')
@@ -120,7 +120,7 @@ function App() {
       </Flex>
 
       <Flex flexDirection="row" gap="10px">
-        <Flex flexDirection='column' justifyContent='flex-start'>
+        <Flex flexDirection='column' justifyContent='space-between' height="350px">
           <FormControl isInvalid={errorCode}>
             <FormLabel>Years Holding</FormLabel>
             <InputGroup>
@@ -149,13 +149,11 @@ function App() {
             {[...invalidErrorsList, 'invalidBondValue'].includes(errorCode) && <FormErrorMessage>{errorMessages[errorCode]}</FormErrorMessage>}
           </FormControl>
 
-          <Flex flexDirection="column" alignItems='center' justifyContent="space-between">
-            <Box>
-              <Heading as='h1' size='xl'>{drawCount}</Heading>
-              <Text fontSize='25px'>Draws</Text>
-            </Box>
-            <Button colorScheme='green' onClick={handleDrawSequence} isDisabled={errorCode} width='100%' marginTop='20px'>Run!</Button>
+          <Flex flexDirection='column' alignSelf="center">
+            <Heading as='h1' size='xl'>{drawCount}</Heading>
+            <Text fontSize='25px'>Draws</Text>
           </Flex>
+          <Button colorScheme='green' onClick={handleDrawSequence} isDisabled={errorCode} width='100%' marginTop='20px'>Run!</Button>
         </Flex>
 
         {Object.entries(compoundWinData).length > 0 &&
